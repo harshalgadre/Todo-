@@ -1,0 +1,24 @@
+{
+  "users": [
+    {
+      "id": "harshal",
+      "name": "Harshal",
+      "phone": "8879720125",
+      "password": "harshal"
+    },
+    {
+      "id": "gauri",
+      "name": "Gauri",
+      "phone": "+918591541286",
+      "password": "gauri"
+    }
+  ],
+  "planner": {
+    "names": {
+      "you": "Harshal",
+      "partner": "Gauri"
+    },
+    "events": [],
+    "tasks": []
+  }
+}

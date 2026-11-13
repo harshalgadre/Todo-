@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daylight — Couple Planner</title>
+<style>
+:root{
+  --ink:#191817;--muted:#77736c;--paper:#fbf6e9;--panel:#fffdf6;--line:#e8e0d1;
+  --pink:#f2b6d8;--pink2:#f8d8e9;--yellow:#f5dc70;--blue:#b9d2f1;--green:#c4d69b;
+  --lav:#d6c8ed;--shadow:0 12px 35px rgba(53,43,25,.08);--radius:22px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#f3eddf;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;max-width:1600px;margin:auto;padding:22px;display:grid;grid-template-columns:245px minmax(0,1fr);gap:20px}
+.sidebar{background:#171717;color:#fff;border-radius:25px;padding:25px 18px;display:flex;flex-direction:column;min-height:calc(100vh - 44px);position:sticky;top:22px;height:calc(100vh - 44px)}
+.brand{font-size:27px;letter-spacing:-1.5px;font-weight:800;padding:4px 12px 35px}.brand span{color:var(--pink)}
+.side-label{color:#85817b;text-transform:uppercase;font-size:10px;letter-spacing:1.5px;padding:0 12px;margin:12px 0}
+.nav{display:flex;align-items:center;gap:13px;border:0;background:transparent;color:#d7d4cf;text-align:left;padding:13px 12px;border-radius:13px;margin:2px 0;font-size:14px}
+.nav:hover,.nav.active{background:#2b2928;color:#fff}.nav.active{box-shadow:inset 3px 0 var(--pink)}
+.nav .ico{width:20px;text-align:center;font-size:17px}
+.sidebar-bottom{margin-top:auto;background:#262423;border-radius:17px;padding:15px;font-size:12px;color:#c9c4bb;line-height:1.5}
+.profile-mini{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#26211e;background:var(--pink)}
+.avatar.you{background:var(--blue)}.avatar.partner{background:var(--pink)}
+.main{min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:4px 3px 23px}
+.search{background:var(--panel);border:1px solid var(--line);border-radius:30px;padding:11px 16px;display:flex;gap:10px;align-items:center;width:min(540px,60%)}
+.search input{border:0;outline:0;background:transparent;width:100%;font-size:13px}
+.top-actions{display:flex;gap:9px;align-items:center}
+.icon-btn{width:40px;height:40px;border:1px solid var(--line);background:var(--panel);border-radius:50%;font-size:16px}
+.heading{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin:0 3px 22px}
+.eyebrow{color:var(--muted);font-size:12px;margin-bottom:8px}
+h1{font-size:clamp(27px,3vw,39px);letter-spacing:-1.8px;margin:0;font-weight:650}
+.date-pill{border:0;border-radius:30px;background:var(--ink);color:#fff;padding:12px 17px;font-size:12px}
+.view-switch{display:flex;gap:5px;background:#eee7d9;padding:4px;border-radius:30px}
+.view-switch button{border:0;background:transparent;padding:8px 14px;border-radius:25px;font-size:12px;color:#6f6a62}
+.view-switch button.active{background:#191817;color:white}
+.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:17px}
+.stat{border-radius:19px;padding:16px 17px;min-height:105px;position:relative;overflow:hidden}
+.stat:nth-child(1){background:var(--yellow)}.stat:nth-child(2){background:var(--pink2)}.stat:nth-child(3){background:var(--blue)}.stat:nth-child(4){background:var(--green)}
+.stat small{font-size:11px;color:#514b40}.stat strong{display:block;font-size:28px;letter-spacing:-1px;margin-top:8px}.stat em{font-style:normal;font-size:11px;color:#5c564d}
+.content-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(260px,.85fr);gap:16px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:19px;box-shadow:var(--shadow);min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
+.panel h2{font-size:17px;margin:0;letter-spacing:-.4px}.sub{font-size:11px;color:var(--muted);margin-top:4px}
+.small-btn{border:1px solid var(--line);background:#fffdf8;border-radius:20px;padding:8px 12px;font-size:11px}
+.week-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;margin-bottom:16px}
+.day{border:1px solid transparent;background:#f6f0e4;border-radius:13px;padding:10px 3px;text-align:center;color:#6c675f}
+.day span{display:block;font-size:10px}.day b{display:block;font-size:14px;margin-top:5px}
+.day.selected{background:#191817;color:white}.day.today:not(.selected){border-color:var(--pink)}
+.timeline{position:relative;max-height:620px;overflow:auto;padding-right:4px}
+.time-row{display:grid;grid-template-columns:48px 1fr;min-height:76px;border-top:1px solid #eee8dc}
+.time-label{font-size:10px;color:#8b857c;padding-top:11px}
+.time-cell{position:relative;padding:7px 0 7px 9px}
+.event{border-radius:13px;padding:10px 12px;margin-bottom:5px;display:flex;justify-content:space-between;gap:8px;align-items:flex-start;min-height:57px}
+.event h4{font-size:12px;margin:0 0 5px}.event p{font-size:10px;color:#5e594f;margin:0}
+.event .tag{font-size:9px;background:rgba(255,255,255,.55);padding:4px 7px;border-radius:20px;white-space:nowrap}
+.event.you{background:#f7d9e9}.event.partner{background:#c6d9f2}.event.shared{background:#f6df79}.event.free{background:#d2dfb5}
+.event-actions{display:flex;gap:5px}.event-actions button{border:0;background:rgba(255,255,255,.5);border-radius:50%;width:23px;height:23px;font-size:11px}
+.legend{display:flex;flex-wrap:wrap;gap:13px;font-size:10px;color:#716b62;margin-top:13px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.right-stack{display:grid;gap:15px}
+.task-list{display:grid;gap:8px}
+.task{display:flex;align-items:flex-start;gap:10px;padding:11px;border-radius:13px;background:#f7f2e8}
+.task input{accent-color:#171717;margin-top:3px;width:15px;height:15px}
+.task-main{min-width:0;flex:1}.task-title{font-size:12px;font-weight:650}.task-meta{font-size:10px;color:var(--muted);margin-top:4px}
+.task.done .task-title{text-decoration:line-through;color:#969087}
+.owner{font-size:9px;padding:5px 7px;border-radius:20px;background:#fff;white-space:nowrap}
+.add-row{display:flex;gap:8px;margin-top:12px}.add-row input{min-width:0;flex:1;border:1px solid var(--line);background:#fffdf8;border-radius:12px;padding:10px;font-size:12px;outline:0}
+.primary{border:0;background:#191817;color:#fff;border-radius:12px;padding:10px 14px;font-size:12px}
+.availability{display:grid;gap:9px}
+.avail-row{display:flex;justify-content:space-between;align-items:center;padding:10px 11px;border-radius:12px;background:#f6f0e4;font-size:11px}
+.avail-row b{font-size:11px}.free-pill{background:#d7e4bd;border-radius:20px;padding:5px 8px;font-size:10px}
+.couple-card{background:#191817;color:white;border-radius:18px;padding:17px}
+.couple-card h3{margin:0 0 6px;font-size:15px}.couple-card p{color:#c7c0b6;font-size:11px;line-height:1.5;margin:0 0 13px}
+.couple-avatars{display:flex;align-items:center;gap:8px}.couple-avatars .avatar{border:2px solid #191817}.plus{color:#f2b6d8;font-size:19px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(20,18,15,.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:5}
+.modal-backdrop.open{display:flex}
+.modal{background:var(--panel);width:min(460px,100%);border-radius:22px;padding:22px;box-shadow:0 25px 80px #0003}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.modal h2{font-size:20px;margin:0}
+.close{border:0;background:#eee7d9;border-radius:50%;width:32px;height:32px}
+.form-grid{display:grid;gap:11px}.field label{display:block;font-size:11px;color:var(--muted);margin:0 0 6px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:#fffdf8;border-radius:11px;padding:11px;font-size:12px;outline:0}
+.form-grid .primary{padding:13px}
+.mobile-menu{display:none}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#191817;color:#fff;padding:11px 16px;border-radius:25px;font-size:12px;opacity:0;pointer-events:none;transition:.25s;z-index:10}.toast.show{opacity:1}
+@media(max-width:1050px){.app{grid-template-columns:205px 1fr;padding:14px;gap:14px}.summary{grid-template-columns:repeat(2,1fr)}.content-grid{grid-template-columns:1fr}.right-stack{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.app{display:block;padding:10px}.sidebar{position:fixed;z-index:4;left:-260px;top:10px;bottom:10px;height:auto;width:235px;min-height:0;transition:left .25s;box-shadow:0 10px 40px #0004}.sidebar.open{left:10px}.mobile-menu{display:inline-grid;place-items:center}.topbar{margin:4px 0 18px}.search{width:100%}.top-actions .icon-btn:nth-child(2){display:none}.heading{align-items:flex-start;flex-direction:column}.heading-right{width:100%;display:flex;justify-content:space-between}.summary{gap:8px}.stat{min-height:90px;padding:13px}.stat strong{font-size:24px}.content-grid{display:block}.right-stack{grid-template-columns:1fr;margin-top:13px}.panel{padding:14px}.week-strip{gap:3px}.day{padding:9px 1px}.day span{font-size:9px}.day b{font-size:12px}.timeline{max-height:500px}}
+
+.login-screen{position:fixed;inset:0;z-index:50;background:#f3eddf;display:grid;place-items:center;padding:20px}
+.login-card{width:min(420px,100%);background:#fffdf6;border:1px solid #e8e0d1;border-radius:26px;padding:30px;box-shadow:0 20px 60px #352b1918}
+.login-brand{font-size:32px;font-weight:800;letter-spacing:-1.5px;margin-bottom:8px}.login-brand span{color:#f2b6d8}
+.login-card p{color:#77736c;font-size:13px;margin:0 0 24px}.login-card label{display:block;font-size:12px;color:#77736c;margin:12px 0 6px}
+.login-card input{width:100%;padding:13px;border:1px solid #e8e0d1;border-radius:12px;background:#fffdf8;outline:none}
+.login-card button{width:100%;margin-top:18px;padding:13px;border:0;border-radius:12px;background:#191817;color:white}
+.login-error{color:#b42318!important;min-height:18px;margin:10px 0 0!important}
+.logout-btn{border:1px solid var(--line);background:var(--panel);border-radius:20px;padding:9px 12px;font-size:11px}
+
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <form class="login-card" id="loginForm">
+    <div class="login-brand">daylight<span>.</span></div>
+    <p>Your little shared space. Sign in to open your planner.</p>
+    <label for="loginPhone">Phone number</label>
+    <input id="loginPhone" autocomplete="username" placeholder="Enter phone number" required>
+    <label for="loginPassword">Password</label>
+    <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter password" required>
+    <button type="submit">Open my planner</button>
+    <p class="login-error" id="loginError"></p>
+  </form>
+</div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">daylight<span>.</span></div>
+    <div class="side-label">Your space</div>
+    <button class="nav active" data-view="day"><span class="ico">▦</span> Day planner</button>
+    <button class="nav" data-view="tasks"><span class="ico">✓</span> To-do lists</button>
+    <button class="nav" data-view="couple"><span class="ico">♡</span> Couple view</button>
+    <button class="nav" data-view="availability"><span class="ico">◷</span> Free time</button>
+    <div class="side-label">Manage</div>
+    <button class="nav" id="addEventNav"><span class="ico">＋</span> Add an event</button>
+    <button class="nav" id="settingsNav"><span class="ico">⚙</span> Preferences</button>
+    <div class="sidebar-bottom">
+      <div class="profile-mini"><div class="avatar you" id="youAvatar">Y</div><div><b id="youNameSide">You</b><br><span style="color:#aaa">Your planner</span></div></div>
+      <div class="profile-mini"><div class="avatar partner" id="partnerAvatar">P</div><div><b id="partnerNameSide">Partner</b><br><span style="color:#aaa">Couple space</span></div></div>
+      <div style="margin-top:12px">Saved on this browser only. Changes do not sync to the other phone yet.</div>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;gap:10px;align-items:center;flex:1;min-width:0">
+        <button class="icon-btn mobile-menu" id="menuBtn">☰</button>
+        <div class="search"><span>⌕</span><input id="searchInput" placeholder="Search tasks, plans, people..."></div>
+      </div>
+      <div class="top-actions"><button class="logout-btn" id="logoutBtn">Log out</button><button class="icon-btn" id="todayBtn" title="Go to today">⌂</button><button class="icon-btn" id="settingsBtn" title="Preferences">⚙</button></div>
+    </div>
+    <div class="heading">
+      <div><div class="eyebrow" id="greeting">YOUR SHARED LITTLE SPACE</div><h1 id="pageTitle">Make today count.</h1></div>
+      <div class="heading-right"><button class="date-pill" id="dateLabel"></button><div class="view-switch"><button class="active" data-mode="week">Week</button><button data-mode="day">Day</button></div></div>
+    </div>
+    <section class="summary">
+      <div class="stat"><small>Things to do today</small><strong id="statTasks">0</strong><em>Across both lists</em></div>
+      <div class="stat"><small>Plans together</small><strong id="statShared">0</strong><em>Shared moments</em></div>
+      <div class="stat"><small>Your free time</small><strong id="statFree">—</strong><em>Open time today</em></div>
+      <div class="stat"><small>Done this week</small><strong id="statDone">0</strong><em>Little wins count</em></div>
+    </section>
+    <div class="content-grid">
+      <section class="panel" id="calendarPanel">
+        <div class="panel-head"><div><h2 id="calendarTitle">Your week at a glance</h2><div class="sub">See both schedules in one timeline</div></div><button class="small-btn" id="addEventBtn">＋ Add plan</button></div>
+        <div class="week-strip" id="weekStrip"></div>
+        <div class="timeline" id="timeline"></div>
+        <div class="legend"><span><i class="dot" style="background:#f2b6d8"></i><span id="legendYou">You</span></span><span><i class="dot" style="background:#b9d2f1"></i><span id="legendPartner">Partner</span></span><span><i class="dot" style="background:#f5dc70"></i>Together</span><span><i class="dot" style="background:#c4d69b"></i>Free time</span></div>
+      </section>
+      <div class="right-stack">
+        <section class="panel" id="tasksPanel">
+          <div class="panel-head"><div><h2>Today's to-dos</h2><div class="sub">A little progress, every day</div></div><button class="small-btn" id="addTaskBtn">＋ Add</button></div>
+          <div class="task-list" id="taskList"></div>
+          <div class="add-row"><input id="quickTask" placeholder="Add a quick task..."><button class="primary" id="quickAdd">Add</button></div>
+        </section>
+        <section class="panel" id="availabilityPanel">
+          <div class="panel-head"><div><h2>When we're free</h2><div class="sub">Based on plans added to the calendar</div></div></div>
+          <div class="availability" id="availabilityList"></div>
+        </section>
+        <section class="couple-card">
+          <h3>Your time, together.</h3><p>One shared view for two busy days. Add plans, keep track of your own tasks, and find a moment that works for both of you.</p>
+          <div class="couple-avatars"><div class="avatar you" id="youAvatarCard">Y</div><span class="plus">＋</span><div class="avatar partner" id="partnerAvatarCard">P</div><span style="font-size:11px;color:#ddd;margin-left:4px" id="coupleNames">You & Partner</span></div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="modal-backdrop" id="eventModal">
+  <div class="modal">
+    <div class="modal-head"><h2>Add a plan</h2><button class="close" data-close="eventModal">×</button></div>
+    <form class="form-grid" id="eventForm">
+      <div class="field"><label>What are you planning?</label><input name="title" required placeholder="e.g. Study session, gym, date night"></div>
+      <div class="field"><label>Who is this for?</label><select name="owner"><option value="you">Just me</option><option value="partner">Just my partner</option><option value="shared">Together</option></select></div>
+      <div class="field"><label>Date</label><input type="date" name="date" required></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>Start time</label><input type="time" name="start" value="10:00" required></div><div class="field"><label>End time</label><input type="time" name="end" value="11:00" required></div></div>
+      <div class="field"><label>Note (optional)</label><input name="note" placeholder="Place, reminder, or details"></div>
+      <button class="primary">Save plan</button>
+    </form>
+  </div>
+</div>
+<div class="modal-backdrop" id="taskModal">
+  <div class="modal">
+    <div class="modal-head"><h2>Add a to-do</h2><button class="close" data-close="taskModal">×</button></div>
+    <form class="form-grid" id="taskForm">
+      <div class="field"><label>Task</label><input name="title" required placeholder="What needs doing?"></div>
+      <div class="field"><label>Whose list?</label><select name="owner"><option value="you">My list</option><option value="partner">Partner's list</option><option value="shared">Our shared list</option></select></div>
+      <div class="field"><label>Due date</label><input type="date" name="date" required></div>
+      <div class="field"><label>Priority</label><select name="priority"><option>Normal</option><option>Important</option><option>Whenever</option></select></div>
+      <button class="primary">Save task</button>
+    </form>
+  </div>
+</div>
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head"><h2>Your people</h2><button class="close" data-close="settingsModal">×</button></div>
+    <form class="form-grid" id="settingsForm">
+      <div class="field"><label>Your name</label><input name="you" maxlength="24" required></div>
+      <div class="field"><label>Partner's name</label><input name="partner" maxlength="24" required></div>
+      <p class="sub">Names personalise the planner on this device. For real-time sharing across two phones, connect a cloud database such as Firebase or Supabase.</p>
+      <button class="primary">Save names</button>
+    </form>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const plusDays=(iso,n)=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return todayISOFrom(d)};
+const todayISOFrom=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const fmt=(iso,opt={weekday:'short',day:'numeric',month:'short'})=>new Date(iso+'T12:00:00').toLocaleDateString('en-IN',opt);
+
+let seed={names:{you:'Harshal',partner:'Gauri'},events:[],tasks:[]};
+let data=seed;
+let loggedInUser=null;
+let selectedDate=todayISO(),mode='week',currentView='day';
+
+// Both accounts use the same planner data on this browser so couple tasks and schedules are visible to both.
+const save=()=>localStorage.setItem('daylightCouplePlanner_shared',JSON.stringify(data));
+const storageKey=()=> 'daylightCouplePlanner_shared';
+async function loadAccountData(){
+  try{
+    const response=await fetch('./data.json',{cache:'no-store'});
+    if(!response.ok) throw new Error('Could not load data.json');
+    const config=await response.json();
+    return config;
+  }catch(err){
+    $('#loginError').textContent='Cannot load data.json. Run this folder using a local web server or deploy both files together.';
+    throw err;
+  }
+}
+async function doLogin(phone,password){
+  const config=await loadAccountData();
+  const account=(config.users||[]).find(u=>u.phone===phone.trim() && u.password===password);
+  if(!account) throw new Error('Phone number or password is incorrect.');
+  loggedInUser=account;
+  const stored=localStorage.getItem(storageKey());
+  data=stored?JSON.parse(stored):(config.planner||seed);
+  data.names={you:'Harshal',partner:'Gauri'};
+  $('#loginScreen').style.display='none';
+  $('#greeting').textContent='WELCOME BACK, '+account.name.toUpperCase();
+  render();
+}
+$('#loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const error=$('#loginError');error.textContent='';
+  try{await doLogin($('#loginPhone').value,$('#loginPassword').value);}
+  catch(err){error.textContent=err.message;}
+});
+$('#logoutBtn').onclick=()=>{
+  loggedInUser=null;data=seed;$('#loginForm').reset();$('#loginError').textContent='';
+  $('#loginScreen').style.display='grid';
+};
+
+const ownerName=o=>o==='you'?data.names.you:o==='partner'?data.names.partner:'Together';
+const initials=s=>(s||'?').trim().charAt(0).toUpperCase();
+const timeMins=t=>{const [h,m]=t.split(':').map(Number);return h*60+m};
+const showToast=msg=>{const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2100)};
+function syncNames(){
+ $('#youNameSide').textContent=data.names.you;$('#partnerNameSide').textContent=data.names.partner;
+ $('#youAvatar').textContent=initials(data.names.you);$('#partnerAvatar').textContent=initials(data.names.partner);
+ $('#youAvatarCard').textContent=initials(data.names.you);$('#partnerAvatarCard').textContent=initials(data.names.partner);
+ $('#coupleNames').textContent=data.names.you+' & '+data.names.partner;
+ $('#legendYou').textContent=data.names.you;$('#legendPartner').textContent=data.names.partner;
+}
+function render(){
+ syncNames();$('#dateLabel').textContent=fmt(selectedDate,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ $('#greeting').textContent=(loggedInUser?'SIGNED IN AS '+loggedInUser.name.toUpperCase()+' · ':'')+(currentView==='couple'?'YOUR SHARED LITTLE SPACE':'A LITTLE SPACE FOR YOUR DAY');
+ $('#pageTitle').textContent=currentView==='tasks'?'Small steps add up.':currentView==='couple'?'Together, at a glance.':currentView==='availability'?'Find your free moment.':'Make today count.';
+ document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===currentView));
+ document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+ renderWeek();renderTimeline();renderTasks();renderAvailability();renderStats();
+}
+function renderWeek(){
+ const strip=$('#weekStrip');strip.innerHTML='';
+ const start=mode==='week'?plusDays(selectedDate,-((new Date(selectedDate+'T12:00:00').getDay()+6)%7)):selectedDate;
+ const count=mode==='week'?7:1;
+ for(let i=0;i<count;i++){const date=plusDays(start,i),d=new Date(date+'T12:00:00');const b=document.createElement('button');b.className='day'+(date===selectedDate?' selected':'')+(date===todayISO()?' today':'');b.innerHTML=`<span>${d.toLocaleDateString('en-IN',{weekday:'short'})}</span><b>${d.getDate()}</b>`;b.onclick=()=>{selectedDate=date;render()};strip.append(b)}
+}
+function renderTimeline(){
+ const timeline=$('#timeline');timeline.innerHTML='';
+ const dayEvents=data.events.filter(e=>e.date===selectedDate).sort((a,b)=>a.start.localeCompare(b.start));
+ const hours=Array.from({length:15},(_,i)=>i+7);
+ hours.forEach(h=>{
+  const row=document.createElement('div');row.className='time-row';const label=document.createElement('div');label.className='time-label';label.textContent=String(h).padStart(2,'0')+':00';
+  const cell=document.createElement('div');cell.className='time-cell';
+  dayEvents.filter(e=>Math.floor(timeMins(e.start)/60)===h).forEach(e=>{
+   const card=document.createElement('div');card.className='event '+e.owner;
+   card.innerHTML=`<div><h4>${escapeHtml(e.title)}</h4><p>${e.start}–${e.end}${e.note?' · '+escapeHtml(e.note):''}</p></div><div class="event-actions"><span class="tag">${ownerName(e.owner)}</span><button title="Delete plan" aria-label="Delete plan">×</button></div>`;
+   card.querySelector('button').onclick=()=>{data.events=data.events.filter(x=>x.id!==e.id);save();render();showToast('Plan removed')};cell.append(card);
+  });
+  row.append(label,cell);timeline.append(row);
+ });
+ if(!dayEvents.length)timeline.innerHTML='<p class="sub" style="padding:18px">Nothing planned yet. Add a plan to start shaping the day.</p>';
+}
+function renderTasks(){
+ const q=$('#searchInput').value.toLowerCase(),tasks=data.tasks.filter(t=>t.date===selectedDate&&(!q||t.title.toLowerCase().includes(q)));
+ $('#taskList').innerHTML='';
+ if(!tasks.length)$('#taskList').innerHTML='<p class="sub">No tasks for this day. Enjoy the breathing room or add one.</p>';
+ tasks.forEach(t=>{
+  const div=document.createElement('div');div.className='task'+(t.done?' done':'');
+  div.innerHTML=`<input type="checkbox" ${t.done?'checked':''} aria-label="Mark complete"><div class="task-main"><div class="task-title">${escapeHtml(t.title)}</div><div class="task-meta">${t.priority} · ${ownerName(t.owner)}</div></div><span class="owner">${t.owner==='shared'?'Together':t.owner==='you'?initials(data.names.you):initials(data.names.partner)}</span>`;
+  div.querySelector('input').onchange=e=>{t.done=e.target.checked;save();render()};$('#taskList').append(div);
+ });
+}
+function renderAvailability(){
+ const ev=data.events.filter(e=>e.date===selectedDate),busy={you:ev.filter(e=>e.owner==='you'||e.owner==='shared'),partner:ev.filter(e=>e.owner==='partner'||e.owner==='shared')};
+ const free=person=>{const sorted=busy[person].slice().sort((a,b)=>a.start.localeCompare(b.start));let cursor=8*60,gaps=[];for(const e of sorted){const s=timeMins(e.start),end=timeMins(e.end);if(s-cursor>=60)gaps.push([cursor,s]);cursor=Math.max(cursor,end)}if(20*60-cursor>=60)gaps.push([cursor,20*60]);return gaps};
+ const both=ev.filter(e=>e.owner==='shared').sort((a,b)=>a.start.localeCompare(b.start));
+ const sharedFree=[];let cursor=8*60,blocks=[...busy.you,...busy.partner].sort((a,b)=>a.start.localeCompare(b.start));for(const e of blocks){const s=timeMins(e.start),en=timeMins(e.end);if(s-cursor>=60)sharedFree.push([cursor,s]);cursor=Math.max(cursor,en)}if(20*60-cursor>=60)sharedFree.push([cursor,20*60]);
+ const fmtTime=n=>`${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`;
+ const first=sharedFree[0];
+ $('#availabilityList').innerHTML=`<div class="avail-row"><b>${escapeHtml(data.names.you)}</b><span class="free-pill">${free('you').length?free('you').map(x=>fmtTime(x[0])).join(', ')+'+' :'Busy / no long gap'}</span></div><div class="avail-row"><b>${escapeHtml(data.names.partner)}</b><span class="free-pill">${free('partner').length?free('partner').map(x=>fmtTime(x[0])).join(', ')+'+' :'Busy / no long gap'}</span></div><div class="avail-row"><b>Both available</b><span class="free-pill">${first?fmtTime(first[0])+' – '+fmtTime(first[1]):'No 1-hour gap found'}</span></div><div class="sub">Free-time estimate: 08:00–20:00, using the plans you've entered.</div>`;
+}
+function renderStats(){
+ const tasks=data.tasks.filter(t=>t.date===selectedDate),shared=data.events.filter(e=>e.date===selectedDate&&e.owner==='shared');
+ const done=data.tasks.filter(t=>t.done&&t.date>=plusDays(todayISO(),-((new Date().getDay()+6)%7))&&t.date<=plusDays(todayISO(),6)).length;
+ const all=[...data.events.filter(e=>e.date===selectedDate&&e.owner==='you'),...data.events.filter(e=>e.date===selectedDate&&e.owner==='shared')].sort((a,b)=>a.start.localeCompare(b.start));
+ let cursor=8*60,free=0;all.forEach(e=>{const s=timeMins(e.start),en=timeMins(e.end);if(s>cursor)free+=s-cursor;cursor=Math.max(cursor,en)});free+=Math.max(0,20*60-cursor);
+ $('#statTasks').textContent=tasks.filter(t=>!t.done).length;$('#statShared').textContent=shared.length;$('#statFree').textContent=Math.floor(free/60)+'h';$('#statDone').textContent=done;
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function openModal(id){$('#'+id).classList.add('open')}
+function closeModal(id){$('#'+id).classList.remove('open')}
+function openEvent(){const f=$('#eventForm');f.date.value=selectedDate;openModal('eventModal')}
+function openTask(){const f=$('#taskForm');f.date.value=selectedDate;openModal('taskModal')}
+$('#addEventBtn').onclick=openEvent;$('#addEventNav').onclick=openEvent;$('#addTaskBtn').onclick=openTask;
+$('#quickAdd').onclick=()=>{const input=$('#quickTask'),title=input.value.trim();if(!title)return;data.tasks.push({id:Date.now(),title,owner:'you',date:selectedDate,priority:'Normal',done:false});input.value='';save();render();showToast('Task added')};
+$('#quickTask').addEventListener('keydown',e=>{if(e.key==='Enter')$('#quickAdd').click()});
+$('#eventForm').onsubmit=e=>{e.preventDefault();const f=e.target,v=Object.fromEntries(new FormData(f));if(timeMins(v.end)<=timeMins(v.start)){showToast('End time must be after start time');return}data.events.push({id:Date.now(),...v});save();closeModal('eventModal');render();f.reset();showToast('Plan saved')};
+$('#taskForm').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target));data.tasks.push({id:Date.now(),...v,done:false});save();closeModal('taskModal');render();e.target.reset();showToast('Task saved')};
+function openSettings(){const f=$('#settingsForm');f.you.value=data.names.you;f.partner.value=data.names.partner;openModal('settingsModal')}
+$('#settingsBtn').onclick=openSettings;$('#settingsNav').onclick=openSettings;
+$('#settingsForm').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target));data.names={you:v.you.trim(),partner:v.partner.trim()};save();closeModal('settingsModal');render();showToast('Names updated')};
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));
+document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;render()});
+document.querySelectorAll('.nav[data-view]').forEach(b=>b.onclick=()=>{currentView=b.dataset.view;$('#sidebar').classList.remove('open');if(currentView==='tasks')$('#tasksPanel').scrollIntoView({behavior:'smooth',block:'center'});else if(currentView==='availability')$('#availabilityPanel').scrollIntoView({behavior:'smooth',block:'center'});else if(currentView==='couple')$('#calendarPanel').scrollIntoView({behavior:'smooth',block:'center'});render()});
+$('#todayBtn').onclick=()=>{selectedDate=todayISO();render()};
+$('#searchInput').oninput=renderTasks;
+$('#menuBtn').onclick=()=>$('#sidebar').classList.toggle('open');
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop').forEach(m=>m.classList.remove('open'))});
+render();
+</script>
+</body>
+</html>
