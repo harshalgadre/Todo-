@@ -2,8 +2,8 @@
 // IMPORTANT: credentials in a browser app are visible to anyone who can inspect its files.
 // Do not reuse these passwords for email, banking, or other important accounts.
 const ACCOUNTS = [
-  { phone: "8879720125", password: "harshal", id: "harshal", name: "Harshal", partnerId: "gauri", partnerName: "Gauri" },
-  { phone: "+918591541286", password: "gauri", id: "gauri", name: "Gauri", partnerId: "harshal", partnerName: "Harshal" }
+  { phone: "8879720125", password: "Harshal", id: "harshal", name: "Harshal", partnerId: "gauri", partnerName: "Gauri" },
+  { phone: "8591541286", password: "gauri", id: "gauri", name: "Gauri", partnerId: "harshal", partnerName: "Harshal" }
 ];
 const STORAGE_KEY = "daylight_couple_v2_data";
 const SESSION_KEY = "daylight_couple_v2_session";
